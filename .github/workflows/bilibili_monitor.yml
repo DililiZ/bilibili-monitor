@@ -1,11 +1,11 @@
-name: Bilibili Hot Monitor
+name: Bilibili Hot Monitor (Every 3 Minutes)
 # v1.1 - 增加注释以强制刷新GitHub Actions的检测
 
 on:
   workflow_dispatch: # 允许在GitHub上手动触发
-  schedule:
-    # 每小时的第5分钟运行，避开整点高峰
-    - cron: '5 * * * *'
+  push:
+    branches:
+      - main
 
 jobs:
   run-monitor:
@@ -50,4 +50,19 @@ jobs:
         with:
           name: bilibili-cache # 使用固定名称，以便下次运行时能找到
           path: data/bilibili_popular_cache.json
-          retention-days: 14 # 缓存文件保留14天 
+          retention-days: 14 # 缓存文件保留14天
+
+  # 使用这个独立的job来实现每3分钟触发一次
+  trigger-every-3-minutes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger workflow every 3 minutes
+        uses: la-haus/act-every-x-minutes@v1
+        with:
+          # 要触发的工作流文件名 (我们自己)
+          workflow_filename: bilibili_monitor.yml
+          # 运行间隔 (分钟)
+          minutes: '3'
+          # GitHub personal access token (PAT)
+          # 这是必须的，用于授权这个action来触发我们自己的工作流
+          token: ${{ secrets.GH_PAT }} 
