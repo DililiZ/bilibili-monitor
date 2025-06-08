@@ -1,4 +1,5 @@
 name: Bilibili Hot Monitor
+# v1.1 - 增加注释以强制刷新GitHub Actions的检测
 
 on:
   workflow_dispatch: # 允许在GitHub上手动触发
