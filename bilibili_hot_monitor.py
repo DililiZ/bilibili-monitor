@@ -20,10 +20,11 @@ W_FAVORITE_GROWTH = 30  # 1个收藏 = 30分
 W_SHARE_GROWTH = 40     # 1次分享 = 40分
 W_COIN_GROWTH = 100     # 1个投币 = 100分 (最高价值)
 
-# 【重要】请填入您自己的B站Cookie。这对于稳定访问API至关重要，可有效避免被风控。
-# 获取方法：登录bilibili.com -> F12打开开发者工具 -> Network -> 刷新页面 -> 找到任意一个 b站的请求 -> Headers -> 找到 cookie, 复制其完整的字符串值。
-# 例如: COOKIE = "SESSDATA=xxxx; bili_jct=xxxx; ..."
-COOKIE = "5f32783a%2C1764905343%2Ca2d93%2A61CjBp0SU9SdZxNRmtGEppBVoIgGSJaActF_ZPkeSV4LzfU7GhfitNyim9hMU6n68gQXoSVnhpUmFpekQwVzdPQ3ZUQ3VvMmZzaVVsRmYyQ3NUY1cwakg1bm5PNk9BQ1pVaHgzdF9OVkJCdldSSUVBYzc0VU9qakM2RHEwU3ZvMnJqWWtmTzVGMnVRIIEC"
+# 【重要】从环境变量中读取Cookie，这是云端部署的最佳实践，保证了安全性。
+# 在本地测试时，可以临时设置环境变量；在GitHub Actions中，将通过Secrets配置。
+COOKIE = os.environ.get('BILI_COOKIE', '')
+if not COOKIE:
+    print("警告：未在环境变量 BILI_COOKIE 中找到Cookie。请求可能会失败或受到更严格的风控。")
 
 # --- 功能函数 ---
 

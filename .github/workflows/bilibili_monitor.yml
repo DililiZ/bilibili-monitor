@@ -1,1 +1,52 @@
- 
+name: Bilibili Hot Monitor
+
+on:
+  workflow_dispatch: # 允许在GitHub上手动触发
+  schedule:
+    # 每小时的第5分钟运行，避开整点高峰
+    - cron: '5 * * * *'
+
+jobs:
+  run-monitor:
+    runs-on: ubuntu-latest # 使用最新的Ubuntu环境
+
+    steps:
+      - name: 1. 检出代码
+        uses: actions/checkout@v4
+
+      - name: 2. 设置Python环境
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: 3. 安装依赖库
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: 4. 下载上一次的缓存数据
+        uses: actions/download-artifact@v4
+        with:
+          name: bilibili-cache
+          path: data
+        continue-on-error: true # 如果是第一次运行，没有缓存文件也别报错
+
+      - name: 5. 运行监控脚本
+        env:
+          # 从仓库的Secrets中读取Cookie，保证安全
+          BILI_COOKIE: ${{ secrets.BILI_COOKIE }}
+        run: python3 bilibili_hot_monitor.py
+
+      - name: 6. 上传本次报告供下载
+        uses: actions/upload-artifact@v4
+        with:
+          name: bilibili-report-${{ github.run_number }}
+          path: bilibili_hot_report.html
+          if-no-files-found: error # 如果没生成报告，就报错
+
+      - name: 7. 保存本次缓存供下次使用
+        uses: actions/upload-artifact@v4
+        with:
+          name: bilibili-cache # 使用固定名称，以便下次运行时能找到
+          path: data/bilibili_popular_cache.json
+          retention-days: 14 # 缓存文件保留14天 
